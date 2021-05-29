@@ -1,0 +1,68 @@
+---
+- name: remove iptables
+  become: true
+  community.general.pacman:
+    name: iptables
+    state: absent
+    # Will break a few dependencies, but iptables-nft provides iptables
+    force: true
+
+- name: install libvirt packages
+  become: true
+  community.general.pacman:
+    name:
+      - libvirt
+      - iptables-nft
+      - dnsmasq
+      - dmidecode
+      - bridge-utils
+      - openbsd-netcat
+      - virt-viewer
+      - virt-manager
+    state: latest
+    update_cache: true
+
+- name: Ensure libvirt group exists
+  become: true
+  ansible.builtin.group:
+    name: libvirt
+    state: present
+
+- name: "add existing user {{ ansible_user_id }} to libvirt group"
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: libvirt
+    append: true
+
+- name: libvirt file-based auth
+  become: true
+  ansible.builtin.copy:
+    content: |
+      uri_default = "qemu:///system"
+      unix_sock_group = "libvirt"
+      unix_sock_ro_perms = "0777"  # set to 0770 to deny non-group libvirt users
+      unix_sock_rw_perms = "0770"
+      auth_unix_ro = "none"
+      auth_unix_rw = "none"
+    dest: /etc/libvirt/libvirtd.conf
+
+- name: nsswitch conf update
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/nsswitch.conf
+    line: "hosts: files libvirt libvirt_guests mymachines myhostname resolve [!UNAVAIL=return] dns"
+    regexp: "^hosts:"
+
+- name: enable libvirtd service
+  become: true
+  ansible.builtin.systemd:
+    name: libvirtd.service
+    enabled: true
+    state: started
+
+- name: enable virtlogd service
+  become: true
+  ansible.builtin.systemd:
+    name: virtlogd.service
+    state: started

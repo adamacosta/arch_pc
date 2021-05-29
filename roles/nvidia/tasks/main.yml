@@ -1,0 +1,32 @@
+---
+- name: ensure pacman dir exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/pacman.d/hooks
+    state: directory
+    mode: "0755"
+
+- name: nvidia install hook
+  become: true
+  ansible.builtin.copy:
+    src: nvidia.hook
+    dest: /etc/pacman.d/hooks/nvidia.hook
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: install nvidia drivers
+  become: true
+  community.general.pacman:
+    name: nvidia
+    state: latest
+    update_cache: true
+
+- name: set nvidia drm
+  become: true
+  copy:
+    src: nvidia.conf
+    dest: /etc/modprobe.d/nvidia.conf
+    owner: root
+    group: root
+    mode: "0644"

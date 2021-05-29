@@ -1,0 +1,24 @@
+---
+- name: "install iwd"
+  become: true
+  community.general.pacman:
+    name: iwd
+    state: latest
+    update_cache: true
+
+- name: "wlan config"
+  become: true
+  notify: "restart iwd"
+  ansible.builtin.copy:
+    src: 20-wlan.network
+    dest: /etc/systemd/network/20-wlan.network
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "iwd service"
+  become: true
+  ansible.builtin.systemd:
+    name: iwd
+    state: started
+    enabled: true

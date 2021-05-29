@@ -1,0 +1,31 @@
+---
+- hosts: local
+  vars:
+    efi_system_partition: /boot/efi
+    grub_cfg_path: /boot/grub/grub.cfg
+    hostname: dpc1
+    browser: firefox
+    nextdns_profile_id: CHANGEME
+    nextdns_ip4_main: '45.90.28.253'
+    nextdns_ip4_fallback: '45.90.30.253'
+    nextdns_ip6_main: '2a07:a8c0::44:f39b'
+    nextdns_ip6_fallback: '2a07:a8c1::44:f39b'
+    github_username: adamacosta
+    gnome_theme: Adwaita-dark
+
+  roles:
+    - common
+    - raid
+    - nvidia
+    - wifi
+    - pacman
+    - zsh
+    - gnome
+    - libvirt
+    - resolved
+    - sublime_text
+    - firefox
+  
+  tasks:
+    - name: run finalizers
+      include_tasks: finalize.yml

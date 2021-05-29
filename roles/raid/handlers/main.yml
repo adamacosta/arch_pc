@@ -1,0 +1,7 @@
+---
+- name: "update grub"
+  become: true
+  ansible.builtin.shell: |
+    mkinitcpio -P
+    grub-install --target=x86_64-efi --efi-directory={{ efi_system_partition }} --bootloader-id=GRUB
+    grub-mkconfig -o {{ grub_cfg_path }}

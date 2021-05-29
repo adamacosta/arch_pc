@@ -1,0 +1,21 @@
+---
+- name: upgrade entire system
+  become: true
+  community.general.pacman:
+    update_cache: yes
+    upgrade: yes
+
+- name: add public keys from github as ssh authorized keys
+  when: github_username is defined
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user_id }}"
+    state: present
+    key: "https://github.com/{{ github_username }}.keys"
+
+- name: find root device path
+  ansible.builtin.shell: "mount | grep ' / ' | cut -d ' ' -f 1"
+  register: root_device
+
+- name: print root device path
+  ansible.builtin.debug:
+    var: root_device

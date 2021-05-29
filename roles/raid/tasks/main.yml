@@ -1,0 +1,41 @@
+---
+- name: "install raid and lvm packages"
+  become: true
+  community.general.pacman:
+    name:
+      - lvm2
+      - mdadm
+    state: latest
+    update_cache: true
+
+- name: "mkinitcpio module conf"
+  become: true
+  notify: "update grub"
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    line: "MODULES=(dm-raid raid0 raid1)"
+    regexp: "^MODULE="
+
+- name: "mkinitcpio binaries conf"
+  become: true
+  notify: "update grub"
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    line: "BINARIES=(mdmon)"
+    regexp: "^BINARIES="
+
+- name: "mkinitcpio hooks conf"
+  become: true
+  notify: "update grub"
+  ansible.builtin.lineinfile:
+    path: /etc/mkinitcpio.conf
+    line: "HOOKS=(base udev autodetect modconf block mdadm_udev lvm2 filesystems keyboard fsck)"
+    regexp: "^HOOKS="
+
+- name: "grub raid0 conf"
+  become: true
+  notify: "update grub"
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet raid0.default_layout=2"'
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="

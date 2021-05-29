@@ -1,0 +1,47 @@
+---
+- name: use color output on tty
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    line: Color
+    regexp: "^#Color"
+
+- name: log to syslog
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    line: UseSyslog
+    regexp: "^#UseSyslog"
+
+- name: ensure rankmirrors is installed
+  become: true
+  community.general.pacman:
+    name: pacman-contrib
+    state: latest
+    update_cache: true
+
+- name: get up to date mirrorlist
+  become: true
+  ansible.builtin.get_url:
+    url: https://archlinux.org/mirrorlist/?country=US&protocol=https&ip_version=4
+    dest: /etc/pacman.d/mirrorlist.new
+    mode: '0644'
+
+- name: uncomment mirror servers
+  become: true
+  ansible.builtin.replace:
+    path: /etc/pacman.d/mirrorlist.new
+    after: '## United States'
+    regexp: '^#Server = (.+)$'
+    replace: 'Server = \1'
+
+- name: run rankmirrors
+  become: true
+  ansible.builtin.shell: "rankmirrors -n 12 /etc/pacman.d/mirrorlist.new > /etc/pacman.d/mirrorlist"
+
+- name: enable paccache autoclean
+  become: true
+  ansible.builtin.systemd:
+    name: paccache.timer
+    state: started
+    enabled: true

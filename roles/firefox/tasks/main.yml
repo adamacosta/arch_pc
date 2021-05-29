@@ -1,0 +1,34 @@
+---
+- name: "install firefox"
+  become: true
+  community.general.pacman:
+    name:
+      - firefox
+      - profile-sync-daemon
+    state: latest
+    update_cache: true
+
+- name: "firefox config"
+  when: browser == "firefox"
+  become: true
+  ansible.builtin.template:
+    src: templates/all-local.js.j2
+    dest: /usr/lib/firefox/browser/defaults/preferences/all-local.js
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "psd config"
+  ansible.builtin.template:
+    src: templates/psd.conf.j2
+    dest: "/home/{{ ansible_user_id }}/.config/psd/psd.conf"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0600"
+
+- name: "psd service"
+  ansible.builtin.systemd:
+    enabled: true
+    scope: user
+    state: started
+    name: psd
