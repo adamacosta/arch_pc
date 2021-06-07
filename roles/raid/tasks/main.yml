@@ -14,7 +14,7 @@
   ansible.builtin.lineinfile:
     path: /etc/mkinitcpio.conf
     line: "MODULES=(dm-raid raid0 raid1)"
-    regexp: "^MODULE="
+    regexp: "^MODULES="
 
 - name: "mkinitcpio binaries conf"
   become: true

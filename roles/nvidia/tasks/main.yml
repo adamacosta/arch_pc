@@ -26,7 +26,7 @@
   become: true
   copy:
     src: nvidia.conf
-    dest: /etc/modprobe.d/nvidia.conf
+    dest: /etc/modprobe.d/nvidia-drm.conf
     owner: root
     group: root
     mode: "0644"

@@ -42,7 +42,6 @@
       - gvfs-mtp
       - gvfs-nfs
       - gvfs-smb
-      - iwd
       - mutter
       - nautilus
       - rygel
@@ -58,10 +57,17 @@
     state: latest
     update_cache: true
 
+- name: enable pulseaudio
+  systemd:
+    enabled: true
+    scope: user
+    state: started
+    name: pulseaudio
+
 - name: enable gdm service
   become: true
   systemd:
-   enabled: yes
+   enabled: true
    state: started
    name: gdm
 
